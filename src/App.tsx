@@ -206,8 +206,30 @@ export const App = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState<string>("");
 
+  const clickOne = () => {
+    window.gtag("event", "4669_landing_1_click_var1");
+  };
+
+  const clickTwo = () => {
+    window.gtag("event", "4669_landing_2_click_var1");
+  };
+
+  const clickThree = () => {
+    window.gtag("event", "4669_landing_3_click_var1");
+  };
+
+  const clickSend = () => {
+    window.gtag("event", "4669_send_var1");
+  };
+
+  const clickClose = () => {
+    window.gtag("event", "4669_close_var1");
+  };
+
   const submit = () => {
     setLoading(true);
+
+    clickSend();
 
     const result = variants
       .reduce((acc: ServiceVariant[], curr) => [...acc, ...curr.services], [])
@@ -219,8 +241,8 @@ export const App = () => {
 
     sendDataToGA({
       ...result,
-      name: name || "",
-      digits: phone || "",
+      name,
+      digits: phone,
     }).then(() => {
       LS.setItem(LSKeys.ShowThx, true);
       setThx(true);
@@ -498,7 +520,10 @@ export const App = () => {
               block
               view="secondary"
               disabled={loading}
-              onClick={() => setEnabled(false)}
+              onClick={() => {
+                clickClose();
+                setEnabled(false);
+              }}
             >
               Закрыть
             </ButtonMobile>
@@ -547,7 +572,14 @@ export const App = () => {
           <Gap size={72} />
 
           <div className={appSt.bottomBtn}>
-            <ButtonMobile block view="primary" onClick={() => setStep(2)}>
+            <ButtonMobile
+              block
+              view="primary"
+              onClick={() => {
+                clickOne();
+                setStep(2);
+              }}
+            >
               Продолжить
             </ButtonMobile>
           </div>
@@ -559,7 +591,14 @@ export const App = () => {
           <Gap size={128} />
 
           <div className={appSt.bottomBtn}>
-            <ButtonMobile block view="primary" onClick={() => setStep(3)}>
+            <ButtonMobile
+              block
+              view="primary"
+              onClick={() => {
+                clickTwo();
+                setStep(3);
+              }}
+            >
               Продолжить
             </ButtonMobile>
 
@@ -586,7 +625,10 @@ export const App = () => {
               block
               view="primary"
               loading={loading}
-              onClick={() => setEnabled(true)}
+              onClick={() => {
+                clickThree();
+                setEnabled(true);
+              }}
             >
               Продолжить
             </ButtonMobile>
