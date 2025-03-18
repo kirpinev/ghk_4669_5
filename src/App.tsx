@@ -13,9 +13,12 @@ import { Link } from "@alfalab/core-components/link";
 import { BottomSheet } from "@alfalab/core-components/bottom-sheet";
 import { Input } from "@alfalab/core-components/input";
 import { MaskedInput } from "@alfalab/core-components/masked-input";
+import { sendDataToGA } from "./utils/events.ts";
 
 interface ServiceVariant {
   name: string;
+  key: string;
+  value: number;
 }
 
 interface Services {
@@ -28,36 +31,58 @@ const one: Services = {
   services: [
     {
       name: "Бесплатные курсы: профобразование, личностный рост, финансы",
+      key: "free_cources",
+      value: 0,
     },
     {
       name: "Сессии с психологом или коучем: бесплатно или со скидкой до 30%",
+      key: "session_psychologyst",
+      value: 0,
     },
     {
       name: "Скидки до 30% на страхование",
+      key: "discounts_insurance",
+      value: 0,
     },
     {
       name: "Бесплатный доступ к сервису «Финансовое здоровье»: личный консультант и финансовое планирование с ИИ",
+      key: "fin_health",
+      value: 0,
     },
     {
       name: "Скидки до 30% в фитнес-залах",
+      key: "discounts_fitness",
+      value: 0,
     },
     {
       name: "Скидки до 30% на общественный транспорт",
+      key: "discounts_public_transport",
+      value: 0,
     },
     {
       name: "Обслуживание без очередей в офисах банка и поддержке",
+      key: "no_queues",
+      value: 0,
     },
     {
       name: "Скидки на телемедицину",
+      key: "discounts_telemedicine",
+      value: 0,
     },
     {
       name: "Консультации по налоговым вычетам",
+      key: "consulting_tax",
+      value: 0,
     },
     {
       name: "Скидки до 30% на онлайн-библиотеки",
+      key: "discounts_library",
+      value: 0,
     },
     {
       name: "Участие в розыгрышах призов (сертификаты, проход в бизнес-залы)",
+      key: "prize",
+      value: 0,
     },
   ],
 };
@@ -67,21 +92,33 @@ const two: Services = {
   services: [
     {
       name: "Скидки до 30% от банка и партнёров: Альфа-Тревел, Альфа-Маркет, Яндекс Подписка, Афиша, Kassir, Заправки, Подели и др.",
+      key: "discounts_partners",
+      value: 0,
     },
     {
       name: "Бесплатный определитель номера от Альфа-Банка",
+      key: "free_number",
+      value: 0,
     },
     {
       name: "Повышенный процент на остаток по накопительному счету",
+      key: "high_percent",
+      value: 0,
     },
     {
       name: "Скидки на кредитные продукты",
+      key: "discounts_credit_products",
+      value: 0,
     },
     {
       name: "Сотовая связь со скидкой 30%",
+      key: "discounts_mobile_con",
+      value: 0,
     },
     {
       name: "Защита процентов при досрочном закрытии вклада",
+      key: "defence_percent",
+      value: 0,
     },
   ],
 };
@@ -91,42 +128,69 @@ const three: Services = {
   services: [
     {
       name: "Увеличенный лимит кэшбэка",
+      key: "cashback_limit",
+      value: 0,
     },
     {
       name: "Дополнительные категории на выбор",
+      key: "add_category",
+      value: 0,
     },
   ],
 };
 
-const four: ServiceVariant[] = [
-  {
-    name: "Транспорт",
-  },
-  {
-    name: "АЗС",
-  },
-  {
-    name: "Книги и канцтовары",
-  },
-  {
-    name: "Активный отдых и фитнес",
-  },
-  {
-    name: "Аптеки",
-  },
-  {
-    name: "Медицинские услуги",
-  },
-  {
-    name: "Образование",
-  },
-  {
-    name: "ЖКХ",
-  },
-  {
-    name: "Детские товары",
-  },
-];
+const four: Services = {
+  name: "",
+  services: [
+    {
+      name: "Транспорт",
+      key: "transport",
+      value: 0,
+    },
+    {
+      name: "АЗС",
+      key: "azs",
+      value: 0,
+    },
+    {
+      name: "Книги и канцтовары",
+      key: "books",
+      value: 0,
+    },
+    {
+      name: "Активный отдых и фитнес",
+      key: "active_hobby",
+      value: 0,
+    },
+    {
+      name: "Аптеки",
+      key: "pharma",
+      value: 0,
+    },
+    {
+      name: "Медицинские услуги",
+      key: "med_services",
+      value: 0,
+    },
+    {
+      name: "Образование",
+      key: "education",
+      value: 0,
+    },
+    {
+      name: "ЖКХ",
+      key: "gkh",
+      value: 0,
+    },
+    {
+      name: "Детские товары",
+      key: "kids_goods",
+      value: 0,
+    },
+  ],
+};
+
+const variants: Services[] = [one, two, three, four];
 
 export const App = () => {
   const [loading, setLoading] = useState(false);
@@ -145,7 +209,19 @@ export const App = () => {
   const submit = () => {
     setLoading(true);
 
-    Promise.resolve().then(() => {
+    const result = variants
+      .reduce((acc: ServiceVariant[], curr) => [...acc, ...curr.services], [])
+      .reduce((acc: Record<string, number>, curr) => {
+        acc[curr.key] = curr.value;
+
+        return acc;
+      }, {});
+
+    sendDataToGA({
+      ...result,
+      name: name || "",
+      digits: phone || "",
+    }).then(() => {
       LS.setItem(LSKeys.ShowThx, true);
       setThx(true);
       setLoading(false);
@@ -212,12 +288,16 @@ export const App = () => {
                     );
 
                     if (find) {
+                      service.value = 0;
+
                       setSelectedServices([
                         ...selectedServices.filter(
                           (s) => s.name !== service.name,
                         ),
                       ]);
                     } else {
+                      service.value = 1;
+
                       setSelectedServices([...selectedServices, service]);
                     }
                   }}
@@ -263,12 +343,16 @@ export const App = () => {
                     );
 
                     if (find) {
+                      service.value = 0;
+
                       setSelectedServices([
                         ...selectedServices.filter(
                           (s) => s.name !== service.name,
                         ),
                       ]);
                     } else {
+                      service.value = 1;
+
                       setSelectedServices([...selectedServices, service]);
                     }
                   }}
@@ -314,6 +398,8 @@ export const App = () => {
                     );
 
                     if (find) {
+                      service.value = 0;
+
                       setSelectedServices([
                         ...selectedServices.filter(
                           (s) => s.name !== service.name,
@@ -324,6 +410,8 @@ export const App = () => {
                         setAdditionalServices([]);
                       }
                     } else {
+                      service.value = 1;
+
                       setSelectedServices([...selectedServices, service]);
                     }
                   }}
@@ -339,7 +427,7 @@ export const App = () => {
                     gap: "1rem",
                   }}
                 >
-                  {four.map((service) => (
+                  {four.services.map((service) => (
                     <div
                       key={service.name}
                       style={{
@@ -364,12 +452,16 @@ export const App = () => {
                           );
 
                           if (find) {
+                            service.value = 0;
+
                             setAdditionalServices([
                               ...additionalServices.filter(
                                 (s) => s.name !== service.name,
                               ),
                             ]);
                           } else {
+                            service.value = 1;
+
                             setAdditionalServices([
                               ...additionalServices,
                               service,
@@ -405,7 +497,7 @@ export const App = () => {
             <ButtonMobile
               block
               view="secondary"
-              loading={loading}
+              disabled={loading}
               onClick={() => setEnabled(false)}
             >
               Закрыть
