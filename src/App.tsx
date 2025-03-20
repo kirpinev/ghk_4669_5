@@ -267,7 +267,7 @@ export const App = () => {
             Особые условия для сотрудников госучереждений
           </Typography.TitleResponsive>
           <Typography.Text view="primary-medium">
-            Выберите бонусы, которыми планируете пользоваться
+            Выберите бонусы, которые хотели бы получить с зарплатным проектом
           </Typography.Text>
           <img src={bottom} alt="Картинка" />
         </div>
