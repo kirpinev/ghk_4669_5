@@ -264,7 +264,7 @@ export const App = () => {
             font="system"
             weight="bold"
           >
-            Особые условия для сотрудников госучреждений
+            Особые условия для сотрудников бюджетной сферы
           </Typography.TitleResponsive>
           <Typography.Text view="primary-medium">
             Выберите бонусы, которые хотели бы получить с зарплатным проектом
